@@ -1,0 +1,18 @@
+{
+  "run_id": "2026-06-26_163829",
+  "stage": 0,
+  "commit": "no-git",
+  "hypothesis": "Harness smoke run should create config, log, metrics, and summary without touching real datasets.",
+  "backbone": "smoke-backbone",
+  "adapter": "no_adapter",
+  "dataset": "smoke",
+  "horizon": 24,
+  "seed": 42,
+  "status": "inconclusive",
+  "mse": 0.0,
+  "mae": 0.0,
+  "peak_vram_gb": 0.0,
+  "trainable_params_m": 0.0,
+  "training_minutes": 0.0006,
+  "notes": "Smoke run completed; no scientific claim."
+}

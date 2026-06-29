@@ -1,0 +1,21 @@
+stage: 1
+dataset: electricity
+split: standard
+horizon: 336
+context_length: 1024
+backbone: chronos-2
+adapter: no_adapter
+graph_builder: none
+curvature_mode: none
+injection_mode: native
+seed: 42
+batch_size: 4
+precision: bf16
+max_epochs: 10
+early_stopping: true
+output_dir: runs
+hypothesis: "Frozen Chronos-2 establishes the Electricity baseline before adapter experiments."
+runner: external
+command: "python train.py --config ${CONFIG_PATH}"
+record: true
+

@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# Generated experiment artifacts
+# runs/*/
+# results/experiments.jsonl
+# results/main_table.md
+# reports/env_report.md
+# reports/geometry_*.md
+# reports/data_request_*.md
+

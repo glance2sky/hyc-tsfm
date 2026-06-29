@@ -1,0 +1,25 @@
+stage: 2
+dataset: electricity
+split: standard
+horizon: 336
+context_length: 1024
+backbone: chronos-2
+adapter: hyc_lorentz_v1
+graph_builder: dynamic_topk
+curvature_mode: adaptive
+injection_mode: input_side_conditioning
+seed: 42
+batch_size: 4
+precision: bf16
+max_epochs: 10
+early_stopping: true
+output_dir: runs
+hypothesis: "Lorentz HyC-Adapter improves Electricity forecasting over frozen Chronos-2 and matched Euclidean Adapter."
+runner: external
+command: "python train.py --config ${CONFIG_PATH}"
+record: true
+adapter_dim: 128
+top_k: 16
+hyperbolic_layers: 2
+dropout: 0.1
+

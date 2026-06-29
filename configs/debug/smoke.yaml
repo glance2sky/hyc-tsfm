@@ -1,0 +1,20 @@
+stage: 0
+dataset: smoke
+split: debug
+horizon: 24
+context_length: 96
+backbone: smoke-backbone
+adapter: no_adapter
+graph_builder: none
+curvature_mode: none
+injection_mode: none
+seed: 42
+batch_size: 2
+precision: fp32
+max_steps: 1
+early_stopping: false
+output_dir: runs
+hypothesis: "Harness smoke run should create config, log, metrics, and summary without touching real datasets."
+runner: smoke
+record: false
+
