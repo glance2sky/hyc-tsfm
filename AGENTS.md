@@ -1,6 +1,6 @@
-# HyC-TSFM Agent Entry
+# HyC-TSFM
 
-你正在进入一个阶段门控的自主科研 harness。你的任务不是随意刷榜，而是审慎推进一篇关于 **HyC-Adapter 是否能提升 TSFM 对多变量依赖和协变量结构利用能力** 的高质量论文。
+这是一篇关于 **HyC-Adapter 是否能提升 TSFM 对多变量依赖和协变量结构利用能力** 高质量论文的自动实验项目。
 
 ## 当前唯一主线
 
@@ -12,29 +12,40 @@
 
 不要突然改成 unrelated forecasting model、纯 benchmark 工程、纯大模型微调或无几何分析的刷分项目。
 
-## 每次工作前必须阅读
+## 参考阅读
 
-按顺序阅读：
+在一些特定条件/情况下，你应该参考不同文件指导：
 
-1. `docs/research_brief.md`
-2. `docs/agent_rules.md`
-3. `docs/experiment_loop.md`
-4. `docs/experiment_protocol.md`
-5. `docs/adapter_spec.md`
+1. 这是一个论文研究项目，如果你需要了解更多该论文的信息来确定查找论文的类型和方向，参考：`docs/research_brief.md`。
+2. 对于试验阶段和实验循环的说明，参考：`docs/experiment_loop.md`。
+4. 实验中需要遵循的协议，参考`docs/experiment_protocol.md`。
+5. 对于Adapter的结构设计和调参细节，可以参考`docs/adapter_spec.md`。
 6. 最近的 `reports/stage_N_review.md`，如果存在
 
 只读完 `AGENTS.md` 还不能开始实验。
 
-## 绝对规则
+## 可以做
 
-- 不得跳过 baseline。
-- 不得修改评估指标、测试集标签、验证集或数据切分来制造提升。
-- 不得删除失败、crash、OOM、无提升实验记录。
-- 默认每轮只提出并执行一个实验 idea。
-- 每个实验必须有 `hypothesis`、`config`、`commit` 或 workspace 状态说明、日志、指标和结论。
-- 如果实验失败，记录失败原因；不要悄悄换下一个实验。
-- 如果只跑了 1 seed，所有结论必须标注 `preliminary`。
-- HyC-Adapter 与 Euclidean Adapter 参数量差距超过 20% 时，不能声称公平。
+- 新增或修改模型代码、adapter 代码、训练脚本、配置文件。
+- 新增实验配置、日志脚本、可视化脚本。
+- 跑小规模 sanity check、baseline、ablation。
+- 记录 crash、OOM、无提升实验。
+- 在失败后提出修复方案并重跑同一实验。
+- 用明确配置下载数据或模型，并记录来源、缓存路径和命令。
+- 写阶段 review、结果表和失败分析。
+
+## 不能做
+
+- 不能修改测试集标签、验证集、数据切分或评估指标来制造提升。
+- 不能把 test set 用于 early stopping 或超参搜索。
+- 不能删除失败实验记录。
+- 不能只报告最好的 seed。
+- 不能把未完成或不稳定结果写成主结论。
+- 不能把不同训练预算的模型直接公平比较。
+- 不能在未记录理由的情况下改变 dataset split、horizon、normalization、context length。
+- 不能让 HyC-Adapter 比 Euclidean Adapter 多很多参数后仍声称公平。
+- 不能默认联网下载大数据或大模型，除非命令、来源和缓存路径已明确记录。
+- 不能绕过 `scripts/run_experiment.py` 写入正式结果。
 
 ## 推荐启动流程
 
@@ -52,14 +63,15 @@
 
 3. 如果还没有 baseline，先跑 baseline config。不要先跑 HyC。
 
-4. 每次正式实验使用：
+4. 一种新的实验配置下的实验应该在新的分支下进行，所以首先检查git state，检查我们所在的分支/提交。如果只是seed不同，算作同一种实验。
+
+5. 每次正式实验使用：
    
    ```bash
    python scripts/run_experiment.py --config configs/debug/smoke.yaml
    python scripts/collect_results.py --run-id <run_id>
    ```
 
-5. 阶段结束后写 `reports/stage_N_review.md`，并按 `docs/reviewer_checklist.md` 自查。
 
 ## 输出纪律
 

@@ -1,6 +1,20 @@
 # Experiment Loop
 
-本项目采用阶段门控，不采用无限随机循环。每个阶段结束必须写 `reports/stage_N_review.md`。
+本项目采用阶段门控，部分阶段采用实验循环。每个阶段结束必须写 `reports/stage_N_review.md`。
+
+
+## Setup
+To set up a new experiment, work with the user to:
+
+1. **Agree on a run tag**: propose a tag based on today's date (e.g. mar5). The branch hyc_tsfm/<tag> must not already exist — this is a fresh run.
+2. **Create the branch**: git checkout -b hyc_tsfm/<tag> from current master.
+3. Read the in-scope files: The repo is small. Read these files for full context:
+   - README.md — repository context.
+   - prepare.py — fixed constants, data prep, tokenizer, dataloader, evaluation. Do not modify.
+   - train.py — the file you modify. Model architecture, optimizer, training loop.
+
+Once you get confirmation, kick off the experimentation.
+
 
 ## 阶段 0：环境与数据检查
 
@@ -39,19 +53,25 @@ python scripts/env_check.py
 
 ## 阶段 2：Adapter 最小原型
 
-目标：
+### 实验循环：
 
-- 实现 Euclidean Adapter。
-- 实现 Lorentz HyC-Adapter。
+1.  一种新的实验配置下的实验应该在新的分支下进行，所以首先检查git state，检查我们所在的分支/提交。如果只是seed不同，算作同一种实验。
+2. 对于新的Adapter，进行训练并测试得出实验结果。如果有所提升(主要看MSE和MAE)，就应该"advance" the branch, keeping the git commit。如果表现下降，git reset back到之前的分支状态。
+3. 如果一种实验配置下的一次实验连续2个epoch模型的表现都没有提升，就认为可以提前结束该配置的实验，然后进行实验总结与结果分析，并准备下一次实验循环。
+4. 根据之前的实验结果，评估是否达到本阶段目标。如果达到，则本阶段循环结束。如果未达到，则根据之前的实验结果分析，主要对Adapter的参数和结构进行改进，继续循环。
+
+阶段目标：
+
+- 实现 Lorentz HyC-Adapter，并且该Adapter带来的提升至少为Baseline的20%。
 - 只在 ETT、Weather、Electricity 小规模跑。
 
 验收条件：
 
 - HyC 不 crash。
 - 至少一个结构型数据集有正收益或明确失败解释。
-- Euclidean 参数量匹配对照存在。
 
 ## 阶段 3：主实验扩展
+
 
 目标：
 
