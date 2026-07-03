@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 from pathlib import Path
@@ -34,7 +34,7 @@ def main() -> None:
 
     headers = [
         "run_id",
-        "stage",
+        "branch",
         "status",
         "dataset",
         "horizon",
@@ -58,4 +58,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

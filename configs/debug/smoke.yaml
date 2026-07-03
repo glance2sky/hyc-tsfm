@@ -1,4 +1,4 @@
-stage: 0
+﻿branch: harness-smoke
 dataset: smoke
 split: debug
 horizon: 24
@@ -17,4 +17,3 @@ output_dir: runs
 hypothesis: "Harness smoke run should create config, log, metrics, and summary without touching real datasets."
 runner: smoke
 record: false
-

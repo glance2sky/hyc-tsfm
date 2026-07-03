@@ -1,11 +1,5 @@
-# Stage 3 Main Configs
+﻿# Legacy Directory
 
-Put main experiment configs here after Stage 2 passes.
+`stage3_main/` is no longer the primary way to organize future experiments.
 
-Required datasets:
-
-- traffic or PEMS
-- solar
-- M5 subset
-- electricity with covariates
-
+Use `configs/branches/<branch-id>/` together with `research/branches/<branch-id>.md`.

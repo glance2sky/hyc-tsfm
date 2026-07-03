@@ -1,0 +1,8 @@
+HyC-TSFM harness smoke run
+run_id: 2026-07-02_140349
+branch: harness-smoke
+git_branch: master
+dataset: smoke
+backbone: smoke-backbone
+adapter: no_adapter
+No model training was executed.

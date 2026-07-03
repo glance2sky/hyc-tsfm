@@ -1,7 +1,6 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
-import os
 import subprocess
 import sys
 import time
@@ -9,22 +8,25 @@ from pathlib import Path
 from typing import Any
 
 from _common import (
+    ROOT,
     RUNS_DIR,
-    command_to_display,
     dump_yaml,
     ensure_dirs,
+    get_git_branch,
     get_git_commit,
     load_yaml,
     now_run_id,
     validate_config,
     write_json,
 )
+from research_journal import append_event, build_experiment_event
 
 
 def build_base_metrics(run_id: str, config: dict[str, Any], status: str, notes: str) -> dict[str, Any]:
     return {
         "run_id": run_id,
-        "stage": config.get("stage"),
+        "branch": config.get("branch"),
+        "git_branch": get_git_branch(),
         "commit": get_git_commit(),
         "hypothesis": config.get("hypothesis"),
         "backbone": config.get("backbone"),
@@ -48,6 +50,8 @@ def run_smoke(run_dir: Path, run_id: str, config: dict[str, Any]) -> dict[str, A
     lines = [
         "HyC-TSFM harness smoke run",
         f"run_id: {run_id}",
+        f"branch: {config.get('branch')}",
+        f"git_branch: {get_git_branch()}",
         f"dataset: {config.get('dataset')}",
         f"backbone: {config.get('backbone')}",
         f"adapter: {config.get('adapter')}",
@@ -79,6 +83,7 @@ def run_external(run_dir: Path, run_id: str, config: dict[str, Any], config_path
     t0 = time.time()
     with log_path.open("w", encoding="utf-8") as log:
         log.write(f"command: {rendered}\n")
+        log.write(f"git_branch: {get_git_branch()}\n")
         log.write(f"original_config: {config_path}\n\n")
         log.flush()
         proc = subprocess.run(
@@ -109,7 +114,8 @@ def run_external(run_dir: Path, run_id: str, config: dict[str, Any], config_path
 def write_summary(run_dir: Path, metrics: dict[str, Any], config: dict[str, Any]) -> None:
     summary = f"""# Run Summary: {metrics["run_id"]}
 
-- stage: `{metrics.get("stage")}`
+- branch: `{metrics.get("branch")}`
+- git_branch: `{metrics.get("git_branch")}`
 - status: `{metrics.get("status")}`
 - hypothesis: {metrics.get("hypothesis")}
 - dataset: `{metrics.get("dataset")}`
@@ -132,6 +138,38 @@ def write_summary(run_dir: Path, metrics: dict[str, Any], config: dict[str, Any]
 Do not use this run for a main scientific claim unless it has matching baselines, required seeds, and reviewer checklist approval.
 """
     run_dir.joinpath("summary.md").write_text(summary, encoding="utf-8")
+
+
+def maybe_log_experiment_event(
+    config: dict[str, Any],
+    config_path: Path,
+    run_id: str,
+    run_dir: Path,
+    metrics: dict[str, Any],
+) -> None:
+    branch = str(config.get("branch") or "")
+    if not branch:
+        return
+
+    try:
+        config_display = config_path.relative_to(ROOT).as_posix()
+    except ValueError:
+        config_display = str(config_path)
+
+    try:
+        run_dir_display = run_dir.relative_to(ROOT).as_posix()
+    except ValueError:
+        run_dir_display = run_dir.as_posix()
+
+    event = build_experiment_event(
+        branch=branch,
+        git_branch=str(metrics.get("git_branch") or get_git_branch()),
+        run_id=run_id,
+        config_path=config_display,
+        metrics=metrics,
+        run_dir=run_dir_display,
+    )
+    append_event(ROOT, branch, event)
 
 
 def main() -> None:
@@ -173,6 +211,7 @@ def main() -> None:
 
     write_json(run_dir / "metrics.json", metrics)
     write_summary(run_dir, metrics, config)
+    maybe_log_experiment_event(config, config_path, run_id, run_dir, metrics)
     print(f"run_id: {run_id}")
     print(f"status: {metrics['status']}")
     print(f"run_dir: {run_dir}")
@@ -180,4 +219,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

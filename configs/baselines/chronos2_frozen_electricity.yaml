@@ -1,4 +1,4 @@
-stage: 1
+﻿branch: electricity-baseline
 dataset: electricity
 split: standard
 horizon: 336
@@ -18,4 +18,3 @@ hypothesis: "Frozen Chronos-2 establishes the Electricity baseline before adapte
 runner: external
 command: "python train.py --config ${CONFIG_PATH}"
 record: true
-

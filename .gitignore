@@ -1,7 +1,15 @@
-__pycache__/
+﻿__pycache__/
 *.pyc
 .venv/
 .env
+
+# Downloaded reference assets stay local by default
+references/papers/*
+!references/papers/.gitkeep
+!references/papers/README.md
+references/external-code/*
+!references/external-code/.gitkeep
+!references/external-code/README.md
 
 # Generated experiment artifacts
 # runs/*/
@@ -10,4 +18,3 @@ __pycache__/
 # reports/env_report.md
 # reports/geometry_*.md
 # reports/data_request_*.md
-

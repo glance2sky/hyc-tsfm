@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 import json
@@ -53,10 +53,17 @@ def print_summary() -> None:
                 rows.append(json.loads(line))
     print(f"total_runs: {len(rows)}")
     print("status_counts:", dict(Counter(row.get("status") for row in rows)))
-    print("stage_counts:", dict(Counter(str(row.get("stage")) for row in rows)))
+    print("branch_counts:", dict(Counter(str(row.get("branch") or "unassigned") for row in rows)))
     if rows:
         last = rows[-1]
-        print("last_run:", last.get("run_id"), last.get("status"), last.get("dataset"), last.get("adapter"))
+        print(
+            "last_run:",
+            last.get("run_id"),
+            last.get("status"),
+            last.get("branch"),
+            last.get("dataset"),
+            last.get("adapter"),
+        )
 
 
 def main() -> None:
@@ -75,4 +82,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

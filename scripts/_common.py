@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 import os
@@ -15,6 +15,7 @@ RESULTS_DIR = ROOT / "results"
 REPORTS_DIR = ROOT / "reports"
 
 REQUIRED_CONFIG_KEYS = {
+    "branch",
     "dataset",
     "split",
     "horizon",
@@ -135,19 +136,48 @@ def validate_config(config: dict[str, Any]) -> list[str]:
     return errors
 
 
+def run_git(args: list[str], check: bool = True) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["git", *args],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=check,
+    )
+
+
 def get_git_commit() -> str:
     try:
-        proc = subprocess.run(
-            ["git", "rev-parse", "--short", "HEAD"],
-            cwd=ROOT,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            check=True,
-        )
-        return proc.stdout.strip()
+        return run_git(["rev-parse", "--short", "HEAD"]).stdout.strip()
     except Exception:
         return "no-git"
+
+
+def get_git_commit_full() -> str:
+    try:
+        return run_git(["rev-parse", "HEAD"]).stdout.strip()
+    except Exception:
+        return "no-git"
+
+
+def get_git_branch() -> str:
+    try:
+        branch = run_git(["branch", "--show-current"]).stdout.strip()
+        return branch or "detached"
+    except Exception:
+        return "no-git"
+
+
+def get_git_status_porcelain() -> str:
+    try:
+        return run_git(["status", "--porcelain"], check=False).stdout
+    except Exception:
+        return ""
+
+
+def git_worktree_clean() -> bool:
+    return get_git_status_porcelain().strip() == ""
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -168,4 +198,3 @@ def command_to_display(command: list[str] | str) -> str:
     if isinstance(command, str):
         return command
     return " ".join(command)
-
