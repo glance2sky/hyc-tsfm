@@ -17,6 +17,7 @@ The default unit of progress is a research branch, not a stage. A branch is one 
 - Store the branch ledger at `research/branches/<branch-id>.md`.
 - **REQUIRED SUB-SKILL:** Use `manage-experiment-branches` before code, config, or model edits begin.
 - **REQUIRED SUB-SKILL:** Use `record-research-progress` whenever files, parameters, or model structures change.
+- **REQUIRED SUB-SKILL:** Use `explore-structure-from-observations` when performance stalls or when choosing between tuning and architecture changes.
 
 Use `skills/run-research-branch/branch-note-template.md` when creating a new branch ledger.
 
@@ -29,6 +30,7 @@ Use `skills/run-research-branch/branch-note-template.md` when creating a new bra
    - fill a missing baseline
    - fill a missing fairness control
    - fix a blocker or crash
+   - collect observations from training or inference
    - mutate the branch mechanism
    - reproduce a promising gain
    - run geometry or covariate diagnosis
@@ -46,7 +48,7 @@ Use `skills/run-research-branch/branch-note-template.md` when creating a new bra
 | Baseline missing | Stop tuning HyC and fill the baseline gap first |
 | Euclidean control missing | Add the control before claiming a HyC-specific benefit |
 | Repeated crash or OOM | Stabilize the branch before opening more variants |
-| No gain after 2-3 meaningful variants | Discard or fork the branch by changing mechanism, not by endless tuning |
+| Repeated non-improving tuning runs | Switch to observation-driven structural diagnosis |
 | One-off gain with weak evidence | Reproduce and add controls before keep |
 | Gain aligns with structural intuition | Keep first, then promote to a broader dataset or backbone |
 

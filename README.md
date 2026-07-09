@@ -17,12 +17,14 @@
   仓库内置的本地研究技能。所有核心流程都从这里触发。
 - `research/branches/`
   研究分支日志。一条 branch 是一个连续的研究线程，不再以 stage 作为主组织单位。
+- `research/activity/`
+  研究过程时间线，记录改动、观测、文献结论、结构提案和实验结果。
 - `references/`
   只读参考资产区，存放论文 PDF、外部源码镜像和阅读笔记。
 - `configs/`
   配置入口。按 `debug/`、`baselines/`、`controls/`、`branches/` 组织。
 - `scripts/`
-  稳定脚本入口，包括研究分支创建、环境检查、实验运行、结果收集和表格汇总。
+  稳定脚本入口，包括研究分支创建、过程记录、环境检查、实验运行、结果收集和表格汇总。
 - `runs/`
   每次实验的产物目录。
 - `results/`
@@ -31,8 +33,8 @@
 ## Minimal Commands
 
 ```bash
-python scripts/research_branch.py start --branch electricity-hyc
-python scripts/env_check.py
+python scripts/research_branch.py start --branch electricity-hyc --question "..." --reason "..."
+python scripts/research_journal.py observe --branch electricity-hyc --summary "..." --reason "..." --stage training --indicator "name=value" --takeaway "..."
 python scripts/run_experiment.py --config configs/debug/smoke.yaml
 python scripts/collect_results.py --summary
 python scripts/make_tables.py
@@ -47,4 +49,4 @@ python scripts/make_tables.py
 - 默认注入方式：`input-side conditioning`
 - 默认关键对照：frozen backbone baseline 与参数量匹配的 Euclidean Adapter
 
-默认版本纪律：每个新实验线程先开 git 分支，结果更好则 keep，不更好则 discard 并回到 base branch。
+默认版本纪律：每个新实验线程先开 git 分支，结果更好则 keep，不更好则 discard 并回到 base branch。默认研究纪律：优先做观测驱动、文献支撑的结构探索，而不是无依据地循环调参。

@@ -22,8 +22,17 @@ from _common import (
 from research_journal import append_event, build_experiment_event
 
 
+OPTIONAL_RUN_METADATA_KEYS = [
+    "change_scope",
+    "change_target",
+    "observation_refs",
+    "literature_refs",
+    "proposal_refs",
+]
+
+
 def build_base_metrics(run_id: str, config: dict[str, Any], status: str, notes: str) -> dict[str, Any]:
-    return {
+    metrics = {
         "run_id": run_id,
         "branch": config.get("branch"),
         "git_branch": get_git_branch(),
@@ -42,6 +51,10 @@ def build_base_metrics(run_id: str, config: dict[str, Any], status: str, notes: 
         "training_minutes": None,
         "notes": notes,
     }
+    for key in OPTIONAL_RUN_METADATA_KEYS:
+        if key in config:
+            metrics[key] = config.get(key)
+    return metrics
 
 
 def run_smoke(run_dir: Path, run_id: str, config: dict[str, Any]) -> dict[str, Any]:
@@ -52,6 +65,8 @@ def run_smoke(run_dir: Path, run_id: str, config: dict[str, Any]) -> dict[str, A
         f"run_id: {run_id}",
         f"branch: {config.get('branch')}",
         f"git_branch: {get_git_branch()}",
+        f"change_scope: {config.get('change_scope')}",
+        f"change_target: {config.get('change_target')}",
         f"dataset: {config.get('dataset')}",
         f"backbone: {config.get('backbone')}",
         f"adapter: {config.get('adapter')}",
@@ -84,6 +99,8 @@ def run_external(run_dir: Path, run_id: str, config: dict[str, Any], config_path
     with log_path.open("w", encoding="utf-8") as log:
         log.write(f"command: {rendered}\n")
         log.write(f"git_branch: {get_git_branch()}\n")
+        log.write(f"change_scope: {config.get('change_scope')}\n")
+        log.write(f"change_target: {config.get('change_target')}\n")
         log.write(f"original_config: {config_path}\n\n")
         log.flush()
         proc = subprocess.run(
@@ -112,6 +129,21 @@ def run_external(run_dir: Path, run_id: str, config: dict[str, Any], config_path
 
 
 def write_summary(run_dir: Path, metrics: dict[str, Any], config: dict[str, Any]) -> None:
+    extra_lines = []
+    if metrics.get("change_scope"):
+        extra_lines.append(f"- change_scope: `{metrics.get('change_scope')}`")
+    if metrics.get("change_target"):
+        extra_lines.append(f"- change_target: `{metrics.get('change_target')}`")
+    if metrics.get("observation_refs"):
+        extra_lines.append(f"- observation_refs: `{metrics.get('observation_refs')}`")
+    if metrics.get("literature_refs"):
+        extra_lines.append(f"- literature_refs: `{metrics.get('literature_refs')}`")
+    if metrics.get("proposal_refs"):
+        extra_lines.append(f"- proposal_refs: `{metrics.get('proposal_refs')}`")
+    extra_text = "\n".join(extra_lines)
+    if extra_text:
+        extra_text += "\n"
+
     summary = f"""# Run Summary: {metrics["run_id"]}
 
 - branch: `{metrics.get("branch")}`
@@ -123,7 +155,7 @@ def write_summary(run_dir: Path, metrics: dict[str, Any], config: dict[str, Any]
 - backbone: `{metrics.get("backbone")}`
 - adapter: `{metrics.get("adapter")}`
 - seed: `{metrics.get("seed")}`
-- mse: `{metrics.get("mse")}`
+{extra_text}- mse: `{metrics.get("mse")}`
 - mae: `{metrics.get("mae")}`
 - peak_vram_gb: `{metrics.get("peak_vram_gb")}`
 - trainable_params_m: `{metrics.get("trainable_params_m")}`

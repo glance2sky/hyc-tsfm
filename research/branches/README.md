@@ -17,4 +17,4 @@
 - `electricity-hyc`
 - `covariate-injection`
 
-默认 git branch 名称是 `research/<branch-id>`。配置中的 `branch` 字段应与这里的 branch id 对齐。
+默认 git branch 名称是 `research/<branch-id>`。配置中的 `branch` 字段应与这里的 branch id 对齐。高质量 branch 一般会同时维护观测焦点、文献锚点和结构假设，而不是只累积调参记录。

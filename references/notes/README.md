@@ -7,3 +7,5 @@
 - local_path
 - why_it_matters
 - borrowable_parts
+- branch_relevance
+- possible_structure_change

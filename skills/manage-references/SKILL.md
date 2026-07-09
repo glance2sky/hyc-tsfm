@@ -24,16 +24,19 @@ Reference assets are allowed, but they must stay clearly separated from owned pr
 - Record source, license, local path, and relevance in `references/notes/<slug>.md`.
 - If a useful implementation idea is found, rewrite or copy it into owned project code under `src/`, `scripts/`, or another project-controlled directory.
 - Keep project-specific experiments, patches, and adapters out of mirrored external repos.
+- When a paper materially changes the branch direction, also record it with `python scripts/research_journal.py literature ...`.
 
 ## Good Workflow
 
 1. Add the paper PDF or repo snapshot to the proper `references/` subdirectory.
 2. Create or update a note in `references/notes/`.
 3. Summarize the mechanism or component worth borrowing.
-4. Re-implement it in owned code only if it helps the active research branch.
+4. Record the actionable conclusion in the branch activity journal.
+5. Re-implement it in owned code only if it helps the active research branch.
 
 ## Common Mistakes
 
 - Treating vendor code as the main implementation area.
 - Downloading references without writing down source and relevance.
 - Mixing project experiments into mirrored external repos so provenance becomes unclear.
+- Reading papers without recording what they changed in the branch strategy.

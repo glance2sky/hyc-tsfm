@@ -25,7 +25,7 @@ def ensure_branch_journal(root: Path, branch: str) -> tuple[Path, Path]:
     if not md_path.exists():
         md_path.write_text(
             f"# Activity Journal: {branch}\n\n"
-            "This file is an auto-appended timeline of research actions, code/config changes, file additions, and experiment outcomes.\n\n"
+            "This file is an auto-appended timeline of research actions, code/config changes, observations, literature findings, structural proposals, and experiment outcomes.\n\n"
             "## Timeline\n\n",
             encoding="utf-8",
         )
@@ -85,6 +85,11 @@ def build_experiment_event(
         "mse": metrics.get("mse"),
         "mae": metrics.get("mae"),
         "notes": metrics.get("notes"),
+        "change_scope": metrics.get("change_scope"),
+        "change_target": metrics.get("change_target"),
+        "observation_refs": metrics.get("observation_refs"),
+        "literature_refs": metrics.get("literature_refs"),
+        "proposal_refs": metrics.get("proposal_refs"),
     }
     summary = f"Run {run_id} finished with status {status}"
     return {
@@ -105,6 +110,84 @@ def build_experiment_event(
     }
 
 
+def build_observation_event(
+    branch: str,
+    git_branch: str,
+    summary: str,
+    reason: str,
+    stage: str,
+    indicators: dict[str, str],
+    takeaway: str,
+    files: list[dict[str, str]] | None = None,
+) -> dict[str, Any]:
+    return {
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "branch": branch,
+        "git_branch": git_branch,
+        "event_type": "observation",
+        "summary": summary,
+        "reason": reason,
+        "files": files or [],
+        "observation": {
+            "stage": stage,
+            "indicators": indicators,
+            "takeaway": takeaway,
+        },
+    }
+
+
+def build_literature_event(
+    branch: str,
+    git_branch: str,
+    title: str,
+    source: str,
+    finding: str,
+    implication: str,
+    reason: str = "",
+) -> dict[str, Any]:
+    return {
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "branch": branch,
+        "git_branch": git_branch,
+        "event_type": "literature",
+        "summary": f"Literature note: {title}",
+        "reason": reason,
+        "files": [],
+        "literature": {
+            "title": title,
+            "source": source,
+            "finding": finding,
+            "implication": implication,
+        },
+    }
+
+
+def build_structure_proposal_event(
+    branch: str,
+    git_branch: str,
+    summary: str,
+    reason: str,
+    target: str,
+    expected_effect: str,
+    evidence_refs: list[str],
+    files: list[dict[str, str]] | None = None,
+) -> dict[str, Any]:
+    return {
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "branch": branch,
+        "git_branch": git_branch,
+        "event_type": "structure_proposal",
+        "summary": summary,
+        "reason": reason,
+        "files": files or [],
+        "proposal": {
+            "target": target,
+            "expected_effect": expected_effect,
+            "evidence_refs": evidence_refs,
+        },
+    }
+
+
 def render_event_markdown(event: dict[str, Any]) -> str:
     lines = [f"### {event.get('timestamp')} `{event.get('event_type')}` {event.get('summary')}", ""]
     git_branch = str(event.get("git_branch") or "")
@@ -122,6 +205,33 @@ def render_event_markdown(event: dict[str, Any]) -> str:
                 f"  - `{file_info.get('path')}` ({file_info.get('change_type')}): {file_info.get('purpose')}"
             )
 
+    observation = event.get("observation")
+    if isinstance(observation, dict):
+        lines.append(f"- observation_stage: `{observation.get('stage')}`")
+        indicators = observation.get("indicators") or {}
+        if indicators:
+            lines.append("- indicators:")
+            for key, value in indicators.items():
+                lines.append(f"  - {key}: {value}")
+        lines.append(f"- takeaway: {observation.get('takeaway')}")
+
+    literature = event.get("literature")
+    if isinstance(literature, dict):
+        lines.append(f"- paper_title: {literature.get('title')}")
+        lines.append(f"- source: {literature.get('source')}")
+        lines.append(f"- finding: {literature.get('finding')}")
+        lines.append(f"- implication: {literature.get('implication')}")
+
+    proposal = event.get("proposal")
+    if isinstance(proposal, dict):
+        lines.append(f"- proposal_target: `{proposal.get('target')}`")
+        lines.append(f"- expected_effect: {proposal.get('expected_effect')}")
+        refs = proposal.get("evidence_refs") or []
+        if refs:
+            lines.append("- evidence_refs:")
+            for ref in refs:
+                lines.append(f"  - {ref}")
+
     result = event.get("result")
     if isinstance(result, dict):
         lines.append(f"- run_id: `{result.get('run_id')}`")
@@ -129,6 +239,16 @@ def render_event_markdown(event: dict[str, Any]) -> str:
         lines.append(f"- run_dir: `{result.get('run_dir')}`")
         lines.append(f"- metrics_path: `{result.get('metrics_path')}`")
         lines.append(f"- summary_path: `{result.get('summary_path')}`")
+        if result.get("change_scope"):
+            lines.append(f"- change_scope: `{result.get('change_scope')}`")
+        if result.get("change_target"):
+            lines.append(f"- change_target: `{result.get('change_target')}`")
+        if result.get("observation_refs"):
+            lines.append(f"- observation_refs: `{result.get('observation_refs')}`")
+        if result.get("literature_refs"):
+            lines.append(f"- literature_refs: `{result.get('literature_refs')}`")
+        if result.get("proposal_refs"):
+            lines.append(f"- proposal_refs: `{result.get('proposal_refs')}`")
         if result.get("mse") is not None or result.get("mae") is not None:
             lines.append(f"- metrics: mse={result.get('mse')}, mae={result.get('mae')}")
 
@@ -164,6 +284,16 @@ def parse_file_args(values: list[str]) -> list[dict[str, str]]:
     return records
 
 
+def parse_indicator_args(values: list[str]) -> dict[str, str]:
+    indicators: dict[str, str] = {}
+    for value in values:
+        parts = value.split("=", 1)
+        if len(parts) != 2:
+            raise SystemExit("Each --indicator entry must look like name=value")
+        indicators[parts[0]] = parts[1]
+    return indicators
+
+
 def cmd_change(args: argparse.Namespace) -> None:
     event = build_branch_event(
         branch=args.branch,
@@ -191,6 +321,53 @@ def cmd_note(args: argparse.Namespace) -> None:
     print(f"Updated markdown journal {md_path}")
 
 
+def cmd_observe(args: argparse.Namespace) -> None:
+    event = build_observation_event(
+        branch=args.branch,
+        git_branch=args.git_branch or get_git_branch(),
+        summary=args.summary,
+        reason=args.reason,
+        stage=args.stage,
+        indicators=parse_indicator_args(args.indicator or []),
+        takeaway=args.takeaway,
+        files=parse_file_args(args.file or []),
+    )
+    jsonl_path, md_path = append_event(ROOT, args.branch, event)
+    print(f"Logged observation event to {jsonl_path}")
+    print(f"Updated markdown journal {md_path}")
+
+
+def cmd_literature(args: argparse.Namespace) -> None:
+    event = build_literature_event(
+        branch=args.branch,
+        git_branch=args.git_branch or get_git_branch(),
+        title=args.title,
+        source=args.source,
+        finding=args.finding,
+        implication=args.implication,
+        reason=args.reason,
+    )
+    jsonl_path, md_path = append_event(ROOT, args.branch, event)
+    print(f"Logged literature event to {jsonl_path}")
+    print(f"Updated markdown journal {md_path}")
+
+
+def cmd_propose(args: argparse.Namespace) -> None:
+    event = build_structure_proposal_event(
+        branch=args.branch,
+        git_branch=args.git_branch or get_git_branch(),
+        summary=args.summary,
+        reason=args.reason,
+        target=args.target,
+        expected_effect=args.expected_effect,
+        evidence_refs=args.evidence_ref or [],
+        files=parse_file_args(args.file or []),
+    )
+    jsonl_path, md_path = append_event(ROOT, args.branch, event)
+    print(f"Logged structure proposal event to {jsonl_path}")
+    print(f"Updated markdown journal {md_path}")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Record structured research activity for a branch.")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -214,6 +391,58 @@ def build_parser() -> argparse.ArgumentParser:
     note.add_argument("--reason", required=True, help="Detailed note body")
     note.add_argument("--git-branch", default="", help="Optional explicit git branch name")
     note.set_defaults(func=cmd_note)
+
+    observe = subparsers.add_parser("observe", help="Record model observations from training, validation, or inference")
+    observe.add_argument("--branch", required=True, help="Research branch id")
+    observe.add_argument("--summary", required=True, help="Short observation title")
+    observe.add_argument("--reason", required=True, help="What prompted this observation")
+    observe.add_argument("--stage", required=True, help="training, validation, inference, or analysis")
+    observe.add_argument("--takeaway", required=True, help="Main takeaway from the observation")
+    observe.add_argument("--git-branch", default="", help="Optional explicit git branch name")
+    observe.add_argument(
+        "--indicator",
+        action="append",
+        default=[],
+        help="Repeated indicator in the format name=value",
+    )
+    observe.add_argument(
+        "--file",
+        action="append",
+        default=[],
+        help="Repeated file record in the format path|change_type|purpose",
+    )
+    observe.set_defaults(func=cmd_observe)
+
+    literature = subparsers.add_parser("literature", help="Record a paper finding and its implication for this branch")
+    literature.add_argument("--branch", required=True, help="Research branch id")
+    literature.add_argument("--title", required=True, help="Paper title or resource title")
+    literature.add_argument("--source", required=True, help="URL, DOI, arXiv id, or local reference path")
+    literature.add_argument("--finding", required=True, help="What the source says that matters here")
+    literature.add_argument("--implication", required=True, help="How this should influence the branch")
+    literature.add_argument("--reason", default="", help="Optional context for why this source was consulted")
+    literature.add_argument("--git-branch", default="", help="Optional explicit git branch name")
+    literature.set_defaults(func=cmd_literature)
+
+    propose = subparsers.add_parser("propose", help="Record a structure-level model change proposal")
+    propose.add_argument("--branch", required=True, help="Research branch id")
+    propose.add_argument("--summary", required=True, help="Short proposal title")
+    propose.add_argument("--reason", required=True, help="Why this structure change is justified")
+    propose.add_argument("--target", required=True, help="Which component should be changed")
+    propose.add_argument("--expected-effect", required=True, help="Expected model effect of the change")
+    propose.add_argument("--git-branch", default="", help="Optional explicit git branch name")
+    propose.add_argument(
+        "--evidence-ref",
+        action="append",
+        default=[],
+        help="Repeated reference to observation or literature evidence",
+    )
+    propose.add_argument(
+        "--file",
+        action="append",
+        default=[],
+        help="Repeated file record in the format path|change_type|purpose",
+    )
+    propose.set_defaults(func=cmd_propose)
 
     return parser
 

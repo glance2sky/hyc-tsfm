@@ -15,6 +15,8 @@ max_epochs: 10
 early_stopping: true
 output_dir: runs
 hypothesis: "Frozen Chronos-2 establishes the Electricity baseline before adapter experiments."
+change_scope: baseline
+change_target: chronos-2-frozen
 runner: external
 command: "python train.py --config ${CONFIG_PATH}"
 record: true

@@ -15,5 +15,7 @@ max_steps: 1
 early_stopping: false
 output_dir: runs
 hypothesis: "Harness smoke run should create config, log, metrics, and summary without touching real datasets."
+change_scope: debug
+change_target: harness
 runner: smoke
 record: false

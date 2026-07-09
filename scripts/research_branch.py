@@ -47,6 +47,18 @@ def build_note(
 
 {reason or '<two to five sentences>'}
 
+## Observation Focus
+
+- <which internal signals or diagnostics matter most for this branch>
+
+## Literature Anchors
+
+- <papers, repos, or notes that justify likely structure moves>
+
+## Structural Hypotheses
+
+- <proposed model change and why>
+
 ## Active Configs
 
 - `configs/...`

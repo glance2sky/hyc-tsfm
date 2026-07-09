@@ -31,14 +31,23 @@ Each official config must define at least:
 - `output_dir`
 - `hypothesis`
 
+Useful optional fields for traceability:
+
+- `change_scope`
+- `change_target`
+- `observation_refs`
+- `literature_refs`
+- `proposal_refs`
+
 ## Run Flow
 
 1. Validate the config with `python scripts/run_experiment.py --config <path> --validate-only`
 2. If the config or parameters were just changed, record that first through `skills/record-research-progress`
-3. Execute the run with `python scripts/run_experiment.py --config <path>`
-4. Inspect `runs/<run_id>/summary.md` and `runs/<run_id>/metrics.json`
-5. Append the run with `python scripts/collect_results.py --run-id <run_id>` only when the config is meant to be recorded
-6. Update the active branch ledger with the result and the next decision
+3. If this is a structure-motivated run, make sure the supporting observation and literature notes already exist
+4. Execute the run with `python scripts/run_experiment.py --config <path>`
+5. Inspect `runs/<run_id>/summary.md` and `runs/<run_id>/metrics.json`
+6. Append the run with `python scripts/collect_results.py --run-id <run_id>` only when the config is meant to be recorded
+7. Update the active branch ledger with the result and the next decision
 
 ## Artifact Contract
 
@@ -56,6 +65,7 @@ After each run, `scripts/run_experiment.py` automatically appends an `experiment
 - which config was used
 - where the run artifacts live
 - status, MSE, MAE, and notes when available
+- optional `change_scope` and `change_target` metadata when present
 
 ## Status Vocabulary
 
@@ -71,3 +81,4 @@ After each run, `scripts/run_experiment.py` automatically appends an `experiment
 - Recording debug smoke runs as scientific evidence.
 - Skipping the branch ledger update after a run completes.
 - Writing conclusions before the fairness control or reproduction step exists.
+- Running a tuning-only experiment without recording why a structure change was not chosen.

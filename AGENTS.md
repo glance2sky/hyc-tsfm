@@ -16,12 +16,12 @@
 
 - 每一条新的研究线程都应该先从干净工作区创建 git 分支，再开始改代码、调参数或改模型结构。
 - 如果一个研究分支没有带来更好的证据，就应该标记为 discard 并回到它的 base branch，而不是把失败版本继续堆在主线上。
+- 不要把“多跑几个超参”当成默认改进策略；当性能停滞或行为异常时，优先收集观测指标、查找文献依据，再做结构级探索。
 - 正式实验结果必须通过 `scripts/run_experiment.py` 产生，再由 `scripts/collect_results.py` 追加到结果汇总。
 - 不允许修改测试集标签、验证集、数据切分或评估指标来制造提升。
 - 不允许把 test set 用于 early stopping 或超参搜索。
 - 不允许删除失败实验记录，也不允许只挑最好 seed 报告。
 - 不允许在没有记录理由的情况下改变 split、horizon、normalization 或 context length。
-- 不允许让 HyC-Adapter 相比 Euclidean Adapter 明显多参数后仍声称公平。
 - `references/papers/` 与 `references/external-code/` 是只读参考区；可以下载和阅读，但不要在其中继续开发。
 - 如果借鉴外部论文源码中的模块，应该重写或复制到项目自有区域，如 `src/`、`scripts/` 或新的项目实现目录中。
 
@@ -29,6 +29,7 @@
 
 - `skills/`：项目的核心工作流与按需披露入口。
 - `research/branches/`：研究分支日志，一条 branch 对应一个连续研究线程。
+- `research/activity/`：研究过程活动日志，记录改动、观测、文献与实验结果。
 - `references/`：论文 PDF、外部源码镜像与参考笔记。
 - `configs/`：debug、baseline、control 与 branch 配置。
 - `runs/`：单次运行产物。

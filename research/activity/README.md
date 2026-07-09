@@ -12,6 +12,9 @@
 - `branch_started`
 - `change`
 - `note`
+- `observation`
+- `literature`
+- `structure_proposal`
 - `experiment_run`
 - `branch_kept`
 - `branch_discarded`

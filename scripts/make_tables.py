@@ -35,6 +35,8 @@ def main() -> None:
     headers = [
         "run_id",
         "branch",
+        "change_scope",
+        "change_target",
         "status",
         "dataset",
         "horizon",

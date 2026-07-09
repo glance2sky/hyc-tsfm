@@ -15,6 +15,8 @@ max_epochs: 10
 early_stopping: true
 output_dir: runs
 hypothesis: "Matched Euclidean Adapter is the fairness control for HyC-Adapter on Electricity."
+change_scope: control
+change_target: euclidean-adapter
 runner: external
 command: "python train.py --config ${CONFIG_PATH}"
 record: true
